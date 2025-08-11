@@ -1,19 +1,18 @@
+// app/layout.jsx  (infinity-landing)
+import './globals.css';
+
 export const metadata = {
   title: 'Infinity Sales — AI Agents that book calls',
-  description: 'On-brand avatar for your site and phone system. Get answers, qualify, and book in seconds.',
-  icons: { icon: '/favicon.ico' },
+  description: 'On-brand voice + avatar agents that answer, qualify, and book within seconds.',
+  icons: {
+    icon: '/favicon.svg', // <- use .svg if you added that; otherwise keep '/favicon.ico'
+  },
 };
-
-import './globals.css';
-import AssistantWidget from '../components/AssistantWidget';
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        {children}
-        <AssistantWidget />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
