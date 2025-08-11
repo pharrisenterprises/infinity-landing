@@ -54,10 +54,15 @@ export default function AssistantWidget() {
 
     const onLauncherClick = (e) => { e.preventDefault(); e.stopPropagation(); openPanel(); };
     launcher.addEventListener('click', onLauncherClick);
+
     const onEsc = (e) => { if (e.key === 'Escape') closePanel(); };
     document.addEventListener('keydown', onEsc);
+
     const onProgrammaticOpen = () => openPanel();
     window.addEventListener('aiw-open', onProgrammaticOpen);
+
+    // TEMP: auto-open once after first mount
+    setTimeout(() => window.dispatchEvent(new Event('aiw-open')), 500);
 
     return () => {
       launcher.removeEventListener('click', onLauncherClick);
