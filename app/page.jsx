@@ -42,7 +42,6 @@ export default function Home() {
           <div className="flex-1 min-w-[280px]">
             <div className="bg-[#0f141b] rounded-xl border border-[#1b2633] h-[360px] w-full overflow-hidden relative">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(30,144,255,.15),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(255,255,255,.06),transparent_30%)]" />
-              {/* Placeholder panel area */}
               <div className="absolute bottom-4 right-4 h-14 w-14 bg-[#1e90ff] rounded-full opacity-30" />
             </div>
           </div>
