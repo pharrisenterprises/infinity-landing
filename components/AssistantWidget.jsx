@@ -1,4 +1,3 @@
-// components/AssistantWidget.jsx
 'use client';
 
 import { useEffect } from 'react';
@@ -8,7 +7,6 @@ const EMBED_URL = `${WIDGET_ORIGIN}/embed`;
 
 export default function AssistantWidget() {
   useEffect(() => {
-    // Ensure a single launcher exists
     let launcher = document.getElementById('aiw-launcher');
     if (!launcher) {
       launcher = document.createElement('button');
@@ -26,7 +24,6 @@ export default function AssistantWidget() {
       document.body.appendChild(launcher);
     }
 
-    // Ensure panel + iframe exist but hidden
     let wrap = document.getElementById('aiw-wrap');
     if (!wrap) {
       wrap = document.createElement('div');
@@ -51,15 +48,11 @@ export default function AssistantWidget() {
       wrap.appendChild(iframe);
     }
 
-    const openPanel = () => { wrap.style.display = 'block'; };
-    const closePanel = () => { wrap.style.display = 'none'; };
+    const open = () => { wrap.style.display = 'block'; };
+    const close = () => { wrap.style.display = 'none'; };
 
-    launcher.onclick = (e) => { e.preventDefault(); e.stopPropagation(); openPanel(); };
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
-
-    return () => {
-      // keep elements around across navigations; no cleanup
-    };
+    launcher.onclick = (e) => { e.preventDefault(); e.stopPropagation(); open(); };
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
   }, []);
 
   return null;
