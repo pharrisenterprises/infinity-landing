@@ -1,73 +1,64 @@
+// components/AssistantWidget.jsx
 'use client';
+
 import { useEffect } from 'react';
+
+const WIDGET_ORIGIN = 'https://avatar-rtl-widget-2.vercel.app';
+const EMBED_URL = `${WIDGET_ORIGIN}/embed`;
 
 export default function AssistantWidget() {
   useEffect(() => {
-    const byId = (id) => document.getElementById(id);
-
-    let launcher = byId('aiw-launcher');
+    // Ensure a single launcher exists
+    let launcher = document.getElementById('aiw-launcher');
     if (!launcher) {
       launcher = document.createElement('button');
       launcher.id = 'aiw-launcher';
-      launcher.type = 'button';
-      launcher.setAttribute('aria-label', 'Open assistant');
-      launcher.innerHTML = `
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M2 3h20v14H6l-4 4V3z"/>
-        </svg>`;
-      Object.assign(launcher.style, {
-        position: 'fixed', right: '16px', bottom: '16px',
-        width: '56px', height: '56px', borderRadius: '50%',
-        background: '#1e90ff', color: '#fff', zIndex: '2147483647',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,.25)', border: '0',
-      });
+      launcher.setAttribute('aria-label', 'Open AI Assistant');
+      launcher.style.cssText = [
+        'position:fixed','right:24px','bottom:24px',
+        'width:64px','height:64px','border-radius:50%',
+        'background:#1976d2','color:#fff','border:0',
+        'display:flex','align-items:center','justify-content:center',
+        'box-shadow:0 10px 30px rgba(0,0,0,.25)','cursor:pointer',
+        'z-index:2147483647'
+      ].join(';');
+      launcher.innerHTML = `<svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M2 3h20v14H7l-5 5V3z"/></svg>`;
       document.body.appendChild(launcher);
     }
 
-    let wrap = byId('aiw-wrap');
+    // Ensure panel + iframe exist but hidden
+    let wrap = document.getElementById('aiw-wrap');
     if (!wrap) {
       wrap = document.createElement('div');
       wrap.id = 'aiw-wrap';
-      Object.assign(wrap.style, {
-        position: 'fixed', right: '16px', bottom: '86px',
-        width: '380px', height: '560px', maxWidth: '90vw', maxHeight: '80vh',
-        background: '#000', borderRadius: '14px', overflow: 'hidden',
-        zIndex: '2147483647', display: 'none', boxShadow: '0 12px 40px rgba(0,0,0,.35)',
-      });
-
-      const iframe = document.createElement('iframe');
-      iframe.id = 'aiw-iframe';
-      iframe.src = 'https://avatar-rtl-widget-2.vercel.app/embed';
-      iframe.allow = 'microphone; camera; autoplay';
-      Object.assign(iframe.style, {
-        position: 'absolute', inset: '0', width: '100%', height: '100%', border: '0',
-        display: 'block', background: '#000',
-      });
-
-      wrap.appendChild(iframe);
+      wrap.style.cssText = [
+        'position:fixed','right:24px','bottom:100px',
+        'width:420px','height:600px','max-width:95vw','max-height:85vh',
+        'background:#000','border-radius:16px','overflow:hidden',
+        'display:none','box-shadow:0 14px 48px rgba(0,0,0,.35)',
+        'z-index:2147483647'
+      ].join(';');
       document.body.appendChild(wrap);
     }
 
-    const openPanel  = () => { wrap.style.display = 'block'; };
+    let iframe = document.getElementById('aiw-iframe');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.id = 'aiw-iframe';
+      iframe.src = EMBED_URL;
+      iframe.allow = 'microphone; camera; autoplay';
+      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;';
+      wrap.appendChild(iframe);
+    }
+
+    const openPanel = () => { wrap.style.display = 'block'; };
     const closePanel = () => { wrap.style.display = 'none'; };
 
-    const onLauncherClick = (e) => { e.preventDefault(); e.stopPropagation(); openPanel(); };
-    launcher.addEventListener('click', onLauncherClick);
-
-    const onEsc = (e) => { if (e.key === 'Escape') closePanel(); };
-    document.addEventListener('keydown', onEsc);
-
-    const onProgrammaticOpen = () => openPanel();
-    window.addEventListener('aiw-open', onProgrammaticOpen);
-
-    // TEMP: auto-open once after first mount
-    setTimeout(() => window.dispatchEvent(new Event('aiw-open')), 500);
+    launcher.onclick = (e) => { e.preventDefault(); e.stopPropagation(); openPanel(); };
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
 
     return () => {
-      launcher.removeEventListener('click', onLauncherClick);
-      document.removeEventListener('keydown', onEsc);
-      window.removeEventListener('aiw-open', onProgrammaticOpen);
+      // keep elements around across navigations; no cleanup
     };
   }, []);
 
