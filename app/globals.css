@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/* Repo B: infinity-landing /app/globals.css */
 :root { color-scheme: dark; }
-html, body { height: 100%; background: #0B0D12; }
+html, body { height: 100%; background: #0b0d12; }
+* { box-sizing: border-box; }
