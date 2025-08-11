@@ -1,5 +1,5 @@
 // app/page.jsx
-import AssistantWidget from '@/components/AssistantWidget';
+import AssistantWidget from '../components/AssistantWidget';
 
 export default function Home() {
   return (
