@@ -1,33 +1,23 @@
 'use client';
+import { useEffect } from 'react';
 
 export default function AssistantWidget() {
-  return (
-    <div
-      id="aiw-wrap"
-      style={{
-        width: '100%',
-        aspectRatio: '4 / 3',
-        borderRadius: 12,
-        overflow: 'hidden',
-        background: '#000',
-        position: 'relative',
-      }}
-    >
-      <iframe
-        id="aiw-iframe"
-        src="https://avatar-rtl-widget-2.vercel.app/embed"
-        allow="microphone; camera; autoplay"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          border: 0,
-          display: 'block',
-          background: '#000',
-        }}
-        title="Infinity Sales Assistant"
-      />
-    </div>
-  );
+  useEffect(() => {
+    // prevent duplicate loads
+    if (document.getElementById('aiw-script')) return;
+
+    const s = document.createElement('script');
+    s.id = 'aiw-script';
+    // bump v when you redeploy the widget to bust cache
+    s.src = 'https://avatar-rtl-widget-2.vercel.app/widget.js?v=10';
+    s.defer = true;
+    document.body.appendChild(s);
+
+    return () => {
+      // optional: don’t remove so it stays across route changes
+    };
+  }, []);
+
+  // Nothing to render here – the script injects the launcher + panel
+  return null;
 }
