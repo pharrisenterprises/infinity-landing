@@ -3,6 +3,7 @@ import AssistantWidget from '../components/AssistantWidget';
 export default function Home() {
   return (
     <main className="min-h-screen px-6 md:px-12 py-16 text-white bg-[#0b0d12]">
+      <AssistantWidget />
       <section className="max-w-6xl mx-auto grid gap-12 md:grid-cols-2 items-start">
         <div className="space-y-6">
           <div className="inline-flex items-center gap-2 text-sm text-slate-300/80">
@@ -25,10 +26,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Avatar panel */}
-        <div className="rounded-xl bg-gradient-to-b from-slate-800/20 to-slate-800/5 p-4">
-          <AssistantWidget />
-        </div>
+        {/* Right column – just a styled card area; widget floats on the page */}
+        <div className="rounded-xl bg-gradient-to-b from-slate-800/20 to-slate-800/5 p-4 min-h-[360px]" />
       </section>
     </main>
   );
