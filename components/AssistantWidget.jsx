@@ -1,151 +1,89 @@
+// components/AssistantWidget.jsx
 'use client';
+
 import { useEffect } from 'react';
 
-/**
- * Self-healing assistant widget loader.
- * 1) Loads https://avatar-rtl-widget-2.vercel.app/widget.js
- * 2) If launcher/wrap/iframe aren’t present quickly, creates them.
- * 3) Robustly wires click to open panel and ensures z-index/pointer-events.
- */
 export default function AssistantWidget() {
   useEffect(() => {
-    const WIDGET_SRC = 'https://avatar-rtl-widget-2.vercel.app/widget.js?v=11';
-
-    // --- utils ---
     const byId = (id) => document.getElementById(id);
-    const ensureStyles = () => {
-      const l = byId('aiw-launcher');
-      const w = byId('aiw-wrap');
-      const f = byId('aiw-iframe');
 
-      if (l) {
-        l.style.cssText = [
-          'position:fixed','right:16px','bottom:16px',
-          'width:56px','height:56px','border-radius:50%',
-          'background:#1e90ff','color:#fff',
-          'display:flex','align-items:center','justify-content:center',
-          'cursor:pointer','pointer-events:auto',
-          'box-shadow:0 8px 24px rgba(0,0,0,.25)',
-          'z-index:2147483647'
-        ].join(';');
-      }
-      if (w) {
-        w.style.cssText = [
-          'position:fixed','right:16px','bottom:86px',
-          'width:380px','height:560px',
-          'max-width:90vw','max-height:80vh',
-          'background:#000','border-radius:14px',
-          'overflow:hidden',
-          'box-shadow:0 12px 40px rgba(0,0,0,.35)',
-          'z-index:2147483647',
-          'display:none','opacity:1','visibility:visible'
-        ].join(';');
-        w.setAttribute('aria-hidden','true');
-      }
-      if (f) {
-        f.style.cssText = [
-          'position:absolute','inset:0',
-          'width:100%','height:100%',
-          'border:0','display:block','background:#000'
-        ].join(';');
-        f.allow = 'microphone; camera; autoplay';
-      }
-    };
-    const makeLauncherIfMissing = () => {
+    const ensure = () => {
       let l = byId('aiw-launcher');
+      let w = byId('aiw-wrap');
+      let f = byId('aiw-iframe');
+
+      // Create elements if missing
       if (!l) {
         l = document.createElement('div');
         l.id = 'aiw-launcher';
-        l.setAttribute('role','button');
-        l.innerHTML = `
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M2 3h20v14H6l-4 4V3z"/>
-          </svg>
-        `;
+        l.setAttribute('role', 'button');
+        l.setAttribute('aria-label', 'Open assistant');
+        l.innerHTML =
+          '<svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 3h20v14H6l-4 4V3z"/></svg>';
         document.body.appendChild(l);
       }
-      return l;
-    };
-    const ensureWrapAndIframe = () => {
-      let w = byId('aiw-wrap');
       if (!w) {
         w = document.createElement('div');
         w.id = 'aiw-wrap';
         document.body.appendChild(w);
       }
-      let f = byId('aiw-iframe');
       if (!f) {
         f = document.createElement('iframe');
         f.id = 'aiw-iframe';
+        // Cache-bust in case a prior failed load got stuck
+        f.src = 'https://avatar-rtl-widget-2.vercel.app/embed?v=' + Date.now();
         f.allow = 'microphone; camera; autoplay';
-        f.src = 'https://avatar-rtl-widget-2.vercel.app/embed';
         w.appendChild(f);
       }
-      ensureStyles();
-      return { w, f };
-    };
-    const openPanel = () => {
-      const { w } = ensureWrapAndIframe();
-      w.style.display = 'block';
-      w.setAttribute('aria-hidden','false');
-      // (optional) ping iframe it just opened
-      try {
-        byId('aiw-iframe')?.contentWindow?.postMessage({type:'aiw-opened'}, '*');
-      } catch {}
-    };
-    const closePanel = () => {
-      const w = byId('aiw-wrap');
-      if (w) {
-        w.style.display = 'none';
-        w.setAttribute('aria-hidden','true');
-      }
-    };
-    const wireClick = () => {
-      const l = makeLauncherIfMissing();
-      l.onclick = (e) => {
+
+      // Styles (assert with !important so theme CSS can’t override)
+      l.style.cssText = [
+        'position:fixed','right:16px','bottom:16px',
+        'width:56px','height:56px','border-radius:50%',
+        'background:#1e90ff','color:#fff',
+        'display:flex','align-items:center','justify-content:center',
+        'cursor:pointer','pointer-events:auto',
+        'box-shadow:0 8px 24px rgba(0,0,0,.25)','z-index:2147483647'
+      ].join('!important;') + '!important;';
+
+      w.style.cssText = [
+        'position:fixed','right:16px','bottom:86px',
+        'width:380px','height:560px','max-width:90vw','max-height:80vh',
+        'background:#000','border-radius:14px','overflow:hidden',
+        'box-shadow:0 12px 40px rgba(0,0,0,.35)',
+        'opacity:1','visibility:visible','display:none',
+        'z-index:2147483647'
+      ].join('!important;') + '!important;';
+      w.setAttribute('aria-hidden','true');
+
+      f.style.cssText = [
+        'position:absolute','inset:0','width:100%','height:100%',
+        'border:0','display:block','background:#000'
+      ].join('!important;') + '!important;';
+
+      // Robust click binding (remove prior to avoid duplicates)
+      l.onclick = null;
+      l.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation();
-        openPanel();
-      };
-      // ESC closes
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closePanel();
-      });
+        w.style.setProperty('display','block','important');
+        w.setAttribute('aria-hidden','false');
+        console.log('[AIW] launcher clicked -> opened');
+      }, { once: false });
+
+      // Public helpers
+      window.aiwOpen  = () => { w.style.setProperty('display','block','important'); w.setAttribute('aria-hidden','false'); };
+      window.aiwClose = () => { w.style.setProperty('display','none','important');  w.setAttribute('aria-hidden','true');  };
     };
 
-    // expose quick helpers for debugging
-    window.aiwOpen = openPanel;
-    window.aiwClose = closePanel;
+    // Run now, and again if something strips our nodes
+    ensure();
+    const mo = new MutationObserver(() => {
+      const ok = byId('aiw-launcher') && byId('aiw-wrap') && byId('aiw-iframe');
+      if (!ok) ensure();
+    });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
 
-    // --- load vendor script (idempotent) ---
-    if (!byId('aiw-script')) {
-      const s = document.createElement('script');
-      s.id = 'aiw-script';
-      s.src = WIDGET_SRC;
-      s.defer = true;
-      document.body.appendChild(s);
-    }
-
-    // Always create/fix our own DOM and handlers (works even if widget.js is slow)
-    makeLauncherIfMissing();
-    ensureWrapAndIframe();
-    ensureStyles();
-    wireClick();
-
-    // Safety: if widget.js didn’t produce DOM, try again quickly
-    const t1 = setTimeout(() => {
-      makeLauncherIfMissing();
-      ensureWrapAndIframe();
-      ensureStyles();
-      wireClick();
-    }, 600);
-
-    // Final nudge: if iframe never got a src or user can’t click the bubble, force-open once
-    const t2 = setTimeout(() => {
-      const f = byId('aiw-iframe');
-      if (f && !f.src) f.src = 'https://avatar-rtl-widget-2.vercel.app/embed';
-    }, 1200);
-
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    return () => mo.disconnect();
   }, []);
 
   return null;
